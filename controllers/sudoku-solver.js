@@ -1,5 +1,5 @@
 class SudokuSolver {
-	rowOffset = {
+	rowOffsets = {
 		a: 0,
 		b: 9,
 		c: 18,
@@ -25,7 +25,10 @@ class SudokuSolver {
 		for (let i = rowOffset; i < rowOffset + 9; i++) {
 			if (i == indexOfEnteredCoordinates) continue;
 
-			if (gridArray[i] == value) return false;
+			if (gridArray[i] == value) {
+				//console.log("row");
+				return false;
+			}
 		}
 		return true;
 	}
@@ -37,9 +40,12 @@ class SudokuSolver {
 
 		for (let i = 97; i <= 105; i++) {
 			let rowChar = String.fromCharCode(i);
-			let idx = rowOffsets[rowChar] + column - 1;
+			let idx = this.rowOffsets[rowChar] + column - 1;
 			if (idx == indexOfEnteredCoordinates) continue;
-			if (gridArray[idx] == value) return false;
+			if (gridArray[idx] == value) {
+				//console.log("column");
+				return false;
+			}
 		}
 		return true;
 	}
@@ -57,7 +63,10 @@ class SudokuSolver {
 			for (let c = 0; c <= 2; c++) {
 				let gridIdx = zeroZeroRegionIdx + r + c * 9;
 				if (gridIdx == indexOfEnteredCoordinates) continue;
-				if (gridArray[gridIdx] == value) return false;
+				if (gridArray[gridIdx] == value) {
+					//console.log("region");
+					return false;
+				}
 			}
 		}
 		return true;
@@ -69,42 +78,46 @@ class SudokuSolver {
 	}
 
 	solve(puzzleString) {
+		let loop = 0;
 		let puzzleArray = Array.from(puzzleString);
 		let arrayOfPotential = [];
 		arrayOfPotential.push(puzzleArray);
 
-		console.log("puzzle converted to array", puzzleArray);
-
+		let startFromBack = false;
 		for (let gridIdx = 0; gridIdx <= 80; gridIdx++) {
-			console.log("index value", puzzleArray[gridIdx]);
+			let _gridIdx = startFromBack ? 80 - gridIdx : gridIdx;
+			//startFromBack = !startFromBack;
 
-			if (puzzleArray[gridIdx] != ".") continue;
+			if (puzzleArray[_gridIdx] != ".") continue;
 
-			let row = this.getRowFromIndex(gridIdx);
-			let column = gridIdx % 9;
+			let row = this.getRowFromIndex(_gridIdx);
+			let column = (_gridIdx % 9) + 1;
 
-			console.log(gridIdx, "coords", row, column);
-
-			/*let dupArrayOfPotential = [...arrayOfPotential];
+			let dupArrayOfPotential = [...arrayOfPotential];
 			arrayOfPotential = [];
 
 			dupArrayOfPotential.forEach((e, i) => {
+				loop++;
+				console.log(_gridIdx, e.join(""), loop, dupArrayOfPotential.length);
 				for (let possibleValue = 1; possibleValue <= 9; possibleValue++) {
 					let fits = true;
 
-					fits = checkRowPlacement(e.join(""), row, column, possibleValue);
+					fits = this.checkRowPlacement(e.join(""), row, column, possibleValue);
 
-					if (fits) fits = checkColPlacement(e.join(""), row, column, possibleValue);
+					if (fits) fits = this.checkColPlacement(e.join(""), row, column, possibleValue);
 
-					if (fits) fits = checkRegionPlacement(e.join(""), row, column, possibleValue);
+					if (fits) fits = this.checkRegionPlacement(e.join(""), row, column, possibleValue);
 
 					if (fits) {
-						e[gridIdx] = possibleValue;
-						arrayOfPotential.push(e);
+						let new_e = [...e];
+						new_e[_gridIdx] = possibleValue;
+						arrayOfPotential.push(new_e);
 					}
 				}
-			});*/
+			});
 		}
+
+		console.log(arrayOfPotential[0].join(""));
 	}
 }
 
